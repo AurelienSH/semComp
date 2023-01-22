@@ -8,10 +8,10 @@ import pandas as pd
 import glob as glb
 import numpy as np
 from gensim.models.word2vec import KeyedVectors, Word2Vec
-from typing import Tuple, List
+from typing import List
 
 
-def w2v_knn(size: int,target: str) -> np.array :
+def w2v_knn(size: str,target: str) -> np.array :
     """
     fonction récupérant les knn d'un mot parmi les vecteurs d'un modèle Word2Vec
     """
@@ -32,6 +32,7 @@ def knn(matrix: pd.DataFrame,target: str) -> np.array(str):
     neighbors = NearestNeighbors(n_neighbors=11, metric='cosine',algorithm='brute')
     neighbors.fit(matrix)
 
+
     # Conversion des données en np.array
     array = (np.array(matrix.loc[target])).reshape(1,-1)
 
@@ -46,7 +47,7 @@ def knn(matrix: pd.DataFrame,target: str) -> np.array(str):
 
     return knn10
 
-def make_path_and_name(matrix: pd.DataFrame) -> Tuple(str):
+def make_path_and_name(matrix: str):
     """
     Fonction de création du chemin d'enregistrement du csv de sortie
     """
@@ -69,21 +70,29 @@ def create_name_from_path(path: str) -> str:
             name = f"PPMI_{laplace}"
         else:
             _, param, paramAtt = filename.split("_")
-            name = f"{method}_{param}_{paramAtt.split('.')[0]}"
+            if method !="VarianceThreshold":
+                name = f"{method}_{param}_{paramAtt.split('.')[0]}"
+            else:
+                name = f"{method}_{param}_{''.join(paramAtt.split('.')[:2])}"
     elif len(filename.split("_")) == 4 :
         _, _, param, paramAtt = filename.split("_")
-        name = f"PPMI_{method}_{param}_{paramAtt.split('.')[0]}"
+        if method != "VarianceThreshold":
+            name = f"PPMI_{method}_{param}_{paramAtt.split('.')[0]}"
+        else:
+            name = f"PPMI_{method}_{param}_{''.join(paramAtt.split('.')[:2])}"
     else:
         _, laplace, _, param, paramAtt = filename.split("_")
-        name = f"PPMI_{laplace}_{method}_{param}_{paramAtt.split('.')[0]}"
+        if method != "VarianceThreshold":
+            name = f"PPMI_{laplace}_{method}_{param}_{paramAtt.split('.')[0]}"
+        else:
+            name = f"PPMI_{laplace}_{method}_{param}_{''.join(paramAtt.split('.')[:2])}"
 
     return name
-def create_neighbors_file(target_word: str,matrices: List[str],size: str, folder = True) -> None:
+def create_neighbors_file(target_words: List[str],matrices: List[str],size: str, folder = True) -> None:
     """
     fonction créant le fichier des knn d'un mot
     """
     allKnn = dict()
-    file_name = f"./outfiles/knn/{target_word}"
     for m in matrices:
         if not folder:
             path, name = make_path_and_name(m)
@@ -91,17 +100,31 @@ def create_neighbors_file(target_word: str,matrices: List[str],size: str, folder
             path = m
             name = create_name_from_path(path)
         df = pd.read_csv(path, index_col=0, sep="\t")
-        allKnn[name] = knn(df, target_word)
-    allKnn["w2v"] = w2v_knn(size, target_word)
-    knn_df = pd.DataFrame.from_dict(allKnn)
-    knn_df.to_csv(f"{file_name}_{size}.tsv", sep="\t")
+        for target_word in target_words:
+            print(f"Evaluation du mot {target_word} à la taille {size} dans la matrice {name}")
+            allKnn[target_word] = allKnn.get(target_word,dict())
+            try:
+                allKnn[target_word][name] = knn(df, target_word)
+            except:
+                print(f"{target_word} n'est pas dans les vecteurs de {name} à la taille {size}")
+    for target_word in target_words:
+        file_name = f"./outfiles/knn/{target_word}"
+        try:
+            allKnn[target_word]["w2v"] = w2v_knn(size, target_word)
+        except:
+            print(f"{target_word} n'est pas dans les vecteurs de w2v, à la taille {size}")
+        knn_df = pd.DataFrame.from_dict(allKnn[target_word])
+        knn_df.to_csv(f"{file_name}_{size}.tsv", sep="\t")
 
     return None
 
 if __name__ == "__main__":
-    target_word = "./25mots.txt"
+    target_words_file = "./25mots.txt"
     # size = sys.argv[2]
-    with open()
+    with open(target_words_file, "r") as f:
+        target_words = [word.strip() for word in f.readlines()]
+
+
 
     # if len(sys.argv) > 2:
     #     matrices = []
@@ -118,5 +141,7 @@ if __name__ == "__main__":
     # else:
 
     # Récupération de toutes les matrices d'une taille d'échantillonnage
-    matrices = glb.glob(f"./outfiles/{size}_sentences/*/*")
-    create_neighbors_file(target_word,matrices,size)
+
+    for size in ['100','1000','10000']:
+        matrices = glb.glob(f"./outfiles/{size}_sentences/*/*")
+        create_neighbors_file(target_words,matrices,size)

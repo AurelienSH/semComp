@@ -37,9 +37,14 @@ def comparisons_to_csv(comparisons: Dict, filename: str) -> pd.DataFrame:
 
         for method in comparisons[wordSize]:
             filename_tmp += f"_{method}"
-            for full_method in df.keys():
-                if full_method.startswith(method):
-                    comp_df[f"{word}_{size}_{method}"] = df[full_method]
+            only_ppmi_check = method.startswith("PPMI") and len(method.split("_")) < 3
+            only_ppmi_laplace_check = method.startswith("PPMI_add") and len(method.split("_")) < 4
+            if only_ppmi_laplace_check or only_ppmi_check:
+                comp_df[f"{word}_{size}_{method}"] = df[f"{method}_{size}"]
+            else:
+                for full_method in df.keys():
+                    if full_method.startswith(method):
+                        comp_df[f"{word}_{size}_{method}"] = df[full_method]
 
     if not filename:
         filename = filename_tmp
