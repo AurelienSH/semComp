@@ -1,0 +1,2 @@
+tir_100 LocallyLinearEmbedding
+tir_10000 VarianceThreshold

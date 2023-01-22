@@ -1,0 +1,5 @@
+100 LocallyLinearEmbedding ncomponents 100
+100 MDS ncomponents 100
+100 NMF ncomponents 100
+100 PCA ncomponents 100
+100 VarianceThreshold threshold 0.02
