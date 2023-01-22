@@ -1,0 +1,3 @@
+véhicule_10000 PPMI_VarianceThreshold_threshold_001 PPMI_add1_PCA_ncomponents_100 w2v
+voiture_10000 PPMI_VarianceThreshold_threshold_001 PPMI_add1_PCA_ncomponents_100 w2v
+camion_10000 PPMI_VarianceThreshold_threshold_001 PPMI_add1_PCA_ncomponents_100 w2v

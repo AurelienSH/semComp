@@ -1,0 +1,3 @@
+artiste_100 simpleCount PPMI PPMI_add1
+artiste_1000 simpleCount PPMI PPMI_add1
+artiste_10000 simpleCount PPMI PPMI_add1

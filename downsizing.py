@@ -25,7 +25,7 @@ reducedMatrix = namedtuple("reducedMatrix", ["name", "matrix", "path"])
 
 # liste de méthodes de réduction de dimensionalité utilisées avec leurs paramètres
 methods = [
-    (PCA, {'n_components': 100}),
+    #(PCA, {'n_components': 100}),
     #(NMF, {'n_components': 100}),
     #(LocallyLinearEmbedding, {'n_components': 100}),
     #(MDS, {'n_components': 100}),
@@ -151,7 +151,7 @@ if __name__ == "__main__":
     # ppmi sans lissage
     elif len(sys.argv) > 2: 
         ppmi = sys.argv[2]
-        matrix = v.vectorize(corpus, size=size, ppmi=ppmi)
+        matrix = v.vectorize(corpus, size=size, ppmi=ppmi, save=True)
         print("Taille originale", matrix.shape)
         reducedMatrices = reduceFeatures(methods, matrix, ppmi=ppmi)
     
